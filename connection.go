@@ -98,7 +98,7 @@ func (c *Connection) Modify(new_c Connection) (msg string, err error) {
 	cmds := new_c.construct_commands()
 	// if address details provided then include
 	if !reflect.DeepEqual(new_c.Addr, AddressDetail{}) {
-		// cmds = append(cmds, c.Addr.construct_commands()...)
+		cmds = append(cmds, new_c.Addr.construct_commands()...)
 		fmt.Println("Address present.")
 	}
 	cmds_str := strings.Join(cmds, " ")
@@ -161,6 +161,10 @@ func GetConnectionByName(conn string) ([]Connection, error) {
 	existingConns := []Connection{}
 	for _, c := range conns {
 		if c.Name == conn {
+			addr,err:=GetAddrDetail(c.Name)
+			if err==nil{
+				c.Addr = &addr
+			}
 			existingConns = append(existingConns, c)
 		}
 	}

@@ -34,12 +34,14 @@ func Test_CreateNewConnection(t *testing.T) {
 	}
 
 }
+
+// https://blog.csdn.net/kfepiza/article/details/127525326
 func Test_ModifyConnection(t *testing.T) {
-	c, _ := GetConnectionByName("有线连接 1")
+	c, _ := GetConnectionByName("eno1")
 	if len(c) == 0 {
 		t.Skipf("Test connection has not been created. This may be due to a prior test failure. Skipping this test.")
 	}
-	conn:=Connection{Name: "eno1"}
+	conn:=Connection{Addr: &AddressDetail{Ipv4_method:"manual",Ipv4_address:"192.168.0.101/24",Ipv4_dns:[]string{"223.5.5.5","8.8.8.8"}}}
 	c[0].Modify(conn)
 }
 

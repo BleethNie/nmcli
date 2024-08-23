@@ -5,7 +5,6 @@ package nmcli
 import (
 	"fmt"
 	"reflect"
-	"strings"
 )
 
 // Given a valid struct generates command value pairs for nmcli
@@ -31,7 +30,16 @@ func generate_commands(c ConnDetails) []string {
 			case string:
 				output = append(output, []string{tag, value.String()}...)
 			case []string:
-				output = append(output, []string{tag, fmt.Sprintf("%v", strings.Join(value.Interface().([]string), " "))}...)
+				items := value.Interface().([]string)
+				content := tag+` "`
+				for index, item := range items {
+					if index == len(items)-1 {
+						content = content + item + `"`
+					} else {
+						content = content + item + `,`
+					}
+				}
+				output = append(output, content)
 			default:
 				fmt.Println(x)
 			}
