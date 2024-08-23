@@ -1,6 +1,6 @@
-module github.com/wcrd/nmcli
+module github.com/BleethNie/nmcli
 
-go 1.17
+go 1.22
 
 require github.com/stretchr/testify v1.7.1
 

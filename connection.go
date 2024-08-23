@@ -25,10 +25,10 @@ type Connection struct {
 	Uuid      string
 	Conn_type string `cmd:"type"`
 	Device    string `cmd:"ifname"`
-	Addr      *AddressDetails
+	Addr      *AddressDetail
 }
 
-type AddressDetails struct {
+type AddressDetail struct {
 	Ipv4_method  string   `cmd:"ipv4.method"`
 	Ipv4_address string   `cmd:"ipv4.address"`
 	Ipv4_gateway string   `cmd:"ipv4.gateway"`
@@ -91,24 +91,24 @@ func (c Connection) Down() (msg string, err error) {
 	return string(res), nil
 }
 
+
 // Modifies the connection with given parameters.
 func (c *Connection) Modify(new_c Connection) (msg string, err error) {
 	// conn_name := &c.Name
 	cmds := new_c.construct_commands()
 	// if address details provided then include
-	if !reflect.DeepEqual(new_c.Addr, AddressDetails{}) {
+	if !reflect.DeepEqual(new_c.Addr, AddressDetail{}) {
 		// cmds = append(cmds, c.Addr.construct_commands()...)
 		fmt.Println("Address present.")
 	}
-	// convert to string command
 	cmds_str := strings.Join(cmds, " ")
-	// fmt.Printf("NEW COMMAND: connection mod %v %v\n", c.Name, cmds_str)
-	// return "", nil
-	// execute
+	command:=fmt.Sprintf(`nmcli connection mod "%v" %v`, c.Name, cmds_str)
+	fmt.Println(command)
+	return
 	res, err := exec.Command(
 		"bash",
 		"-c",
-		fmt.Sprintf("nmcli connection mod %v %v", c.Name, cmds_str),
+		command,
 	).Output()
 	if err != nil {
 		return string(res), err
@@ -123,6 +123,7 @@ func (c *Connection) Modify(new_c Connection) (msg string, err error) {
 
 	return string(res), nil
 }
+
 
 // Returns all connections defined in nmcli
 // Equivalent to: nmcli connection
@@ -141,7 +142,12 @@ func Connections() []Connection {
 		// fmt.Println(line)
 		results = append(results, parseConnection(line))
 	}
-
+	for index, conn := range results {
+		addr,err:=GetAddrDetail(conn.Name)
+		if err==nil{
+			results[index].Addr = &addr
+		}
+	}
 	return results
 }
 
@@ -194,7 +200,40 @@ func AddConnection(conn *Connection) (msg string, err error) {
 	return string(res), nil
 }
 
-func (addr AddressDetails) construct_commands() []string {
+func GetAddrDetail(connName string) (AddressDetail, error) {
+	res, err := exec.Command(
+		"bash",
+		"-c",
+		`nmcli connection show "`+connName+`"`,
+	).Output()
+	if err != nil {
+		return AddressDetail{}, err
+	}
+	lines := strings.Split(strings.TrimSpace(string(res)), "\n")
+	addr := AddressDetail{}
+	for _, line := range lines {
+		if strings.Contains(line, "ipv4.method:") {
+			addr.Ipv4_method = strings.TrimSpace(strings.TrimPrefix(line, "ipv4.method:"))
+		}
+		if strings.Contains(line, "IP4.ADDRESS[1]:") {
+			addr.Ipv4_address = strings.TrimSpace(strings.TrimPrefix(line, "IP4.ADDRESS[1]:"))
+		}
+		if strings.Contains(line, "IP4.GATEWAY:") {
+			addr.Ipv4_gateway = strings.TrimSpace(strings.TrimPrefix(line, "IP4.GATEWAY:"))
+		}
+		if strings.Contains(line, "IP4.DNS[1]:") {
+			dns := strings.TrimSpace(strings.TrimPrefix(line, "IP4.DNS[1]:"))
+			addr.Ipv4_dns = append(addr.Ipv4_dns, dns)
+		}
+		if strings.Contains(line, "IP4.DNS[2]:") {
+			dns := strings.TrimSpace(strings.TrimPrefix(line, "IP4.DNS[2]:"))
+			addr.Ipv4_dns = append(addr.Ipv4_dns, dns)
+		}
+	}
+	return addr, nil
+}
+
+func (addr AddressDetail) construct_commands() []string {
 	return generate_commands(addr)
 }
 

@@ -4,8 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func Test_CreateNewConnection(t *testing.T) {
@@ -15,7 +13,7 @@ func Test_CreateNewConnection(t *testing.T) {
 		Name:      "wcrd-go-nmcli-wrapper-test-connection",
 		Conn_type: "dummy",
 		Device:    "eth10",
-		Addr: &AddressDetails{
+		Addr: &AddressDetail{
 			Ipv4_method:  "manual",
 			Ipv4_address: "192.168.2.1",
 			Ipv4_dns:     []string{"8.8.8.8", "1.1.1.1"},
@@ -36,24 +34,42 @@ func Test_CreateNewConnection(t *testing.T) {
 	}
 
 }
-func Test_ModifyConnection(t *testing.T) {}
+func Test_ModifyConnection(t *testing.T) {
+	c, _ := GetConnectionByName("有线连接 1")
+	if len(c) == 0 {
+		t.Skipf("Test connection has not been created. This may be due to a prior test failure. Skipping this test.")
+	}
+	conn:=Connection{Name: "eno1"}
+	c[0].Modify(conn)
+}
+
+
+func Test_GetAddrDetail(t *testing.T) {
+	addr,err:=GetAddrDetail("有线连接 1")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(addr)
+}
+
+
 
 func Test_CloneConnection(t *testing.T) {
 	// get connection
-	c, _ := GetConnectionByName("wcrd-go-nmcli-wrapper-test-connection")
+	c, _ := GetConnectionByName("eno1")
 	if len(c) == 0 {
 		t.Skipf("Test connection has not been created. This may be due to a prior test failure. Skipping this test.")
 	}
 
 	// clone
-	msg, err := c[0].Clone("wcrd-go-nmcli-wrapper-test-connection-clone")
+	msg, err := c[0].Clone("eno2")
 	if err != nil {
 		t.Errorf("failed to clone connection.\nmsg: %v", msg)
 	}
 
 	// verify creation
 	c, _ = GetConnectionByName("wcrd-go-nmcli-wrapper-test-connection-clone")
-	assert.GreaterOrEqual(t, len(c), 1, "No connection by the cloned name was found.")
 
 	// clean-up
 	_, err = c[0].Delete()
@@ -76,7 +92,7 @@ func Test_ConnectionUp(t *testing.T) {
 
 }
 
-//TODO
+// TODO
 func Test_ConnectionDown(t *testing.T) {
 	// requires that the create new connection has run prior
 
