@@ -7,6 +7,10 @@ import (
 )
 
 
+func Test_Method(t *testing.T) {
+	fmt.Println(Manual.String())
+}
+
 func Test_ListConnection(t *testing.T) {
 	conns:=Connections()
 	for _,conn  := range conns {
@@ -27,12 +31,13 @@ func Test_GetAddrDetail(t *testing.T) {
 // rename connection name
 // https://blog.csdn.net/kfepiza/article/details/127525326
 func Test_ModifyConnectionName(t *testing.T) {
-	c, _ := GetConnectionByName("ens-13")
+	c, _ := GetConnectionByName("netplan-ens33")
 	if len(c) == 0 {
 		t.Skipf("Test connection has not been created. This may be due to a prior test failure. Skipping this test.")
 	}
 	conn:=Connection{Name: "ens-13",Addr:&AddressDetail{}}
 	c[0].Modify(conn)
+	c[0].Up()
 }
 
 
@@ -41,7 +46,7 @@ func Test_ModifyConnectionIp(t *testing.T) {
 	if len(c) == 0 {
 		t.Skipf("Test connection has not been created. This may be due to a prior test failure. Skipping this test.")
 	}
-	conn:=Connection{Addr:&AddressDetail{Ipv4_address:"192.168.1.14/24",Ipv4_dns:[]string{"233.5.5.5","8.8.8.8"}}}
+	conn:=Connection{Addr:&AddressDetail{Ipv4_method:Manual.String(),Ipv4_address:"192.168.1.13/24"  ,Ipv4_dns:[]string{"233.5.5.5","8.8.8.8"}}}
 	c[0].Modify(conn)
 	c[0].Up()
 }

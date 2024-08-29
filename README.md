@@ -55,6 +55,9 @@ netplan apply
 
 ## Usage 
 
+`go get github.com/BleetNie/nmcli`
+
+
 ### Check network manager (`nmcli`) version on system 
 ```golang
 ver, err := nmcli.ValidateNmcliInstalled()

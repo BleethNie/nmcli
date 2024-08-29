@@ -9,6 +9,20 @@ import (
 	"strings"
 )
 
+type Method string
+
+const (
+	Manual Method = "manual"
+	Auto  Method = "auto"
+)
+
+func (m Method) String() string {
+	val := reflect.ValueOf(m)
+	return val.String() 
+}
+
+
+
 // TODO: Update all code to use bash -c for exec.Command
 
 type ConnDetails interface {
@@ -30,7 +44,7 @@ type Connection struct {
 
 type AddressDetail struct {
 	Ipv4_method  string   `cmd:"ipv4.method"`
-	Ipv4_address string   `cmd:"ipv4.address"`
+	Ipv4_address string   `cmd:"ipv4.addresses"`
 	Ipv4_gateway string   `cmd:"ipv4.gateway"`
 	Ipv4_dns     []string `cmd:"ipv4.dns"`
 }
