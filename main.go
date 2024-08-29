@@ -22,16 +22,13 @@ func CheckNmcliExist() (string, error) {
 
 func InstallNmcli() (string, error) {
 	res, err := exec.Command(
-		"bash",
-		"-c",
-		"apt install network-manager",
+		"bash","-c","apt -y install network-manager",
 	).CombinedOutput()
 	if err != nil {
-		return "", errors.New("nmcli install completed")
+		return "", err
 	}
 	return string(res), nil
 }
-
 
 // check nmcli is enable
 func CheckNmcliEnable() (bool, error) {
@@ -41,18 +38,15 @@ func CheckNmcliEnable() (bool, error) {
 		"nmcli networking",
 	).CombinedOutput()
 	if err != nil {
-		return false, errors.New("nmcli networking command error:"+err.Error())
+		return false, errors.New("nmcli networking command error:" + err.Error())
 	}
-	status:=string(res)
-	status,_=strings.CutSuffix(status,"\n")
-	if status=="enabled"{
-		return true,nil
+	status := string(res)
+	status, _ = strings.CutSuffix(status, "\n")
+	if status == "enabled" {
+		return true, nil
 	}
 	return false, nil
 }
-
-
-
 
 // nmcli n on/off
 func ChangeNmcliStatus(status string) (string, error) {
@@ -62,9 +56,7 @@ func ChangeNmcliStatus(status string) (string, error) {
 		"nmcli n "+status,
 	).CombinedOutput()
 	if err != nil {
-		return "",errors.New("nmcli n command error:"+err.Error())
+		return "", errors.New("nmcli n command error:" + err.Error())
 	}
 	return string(res), nil
 }
-
-

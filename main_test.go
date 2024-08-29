@@ -25,7 +25,7 @@ func Test_InstallNmcli(t *testing.T) {
 func Test_CheckNmcliEnable(t *testing.T) {
 	enable, err := CheckNmcliEnable()
 	if err != nil {
-		fmt.Println(err.Error())
+		fmt.Println("nmcli enable error:"+err.Error())
 	}
 	fmt.Println("nmcli enable status:" + strconv.FormatBool(enable))
 }

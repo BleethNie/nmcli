@@ -6,8 +6,49 @@ import (
 	"testing"
 )
 
-func Test_CreateNewConnection(t *testing.T) {
 
+func Test_ListConnection(t *testing.T) {
+	conns:=Connections()
+	for _,conn  := range conns {
+		fmt.Println(conn)
+	}
+}
+
+func Test_GetAddrDetail(t *testing.T) {
+	addr,err:=GetAddrDetail("ens-13")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(addr)
+}
+
+
+// rename connection name
+// https://blog.csdn.net/kfepiza/article/details/127525326
+func Test_ModifyConnectionName(t *testing.T) {
+	c, _ := GetConnectionByName("ens-13")
+	if len(c) == 0 {
+		t.Skipf("Test connection has not been created. This may be due to a prior test failure. Skipping this test.")
+	}
+	conn:=Connection{Name: "ens-13",Addr:&AddressDetail{}}
+	c[0].Modify(conn)
+}
+
+
+func Test_ModifyConnectionIp(t *testing.T) {
+	c, _ := GetConnectionByName("ens-13")
+	if len(c) == 0 {
+		t.Skipf("Test connection has not been created. This may be due to a prior test failure. Skipping this test.")
+	}
+	conn:=Connection{Addr:&AddressDetail{Ipv4_address:"192.168.1.14/24",Ipv4_dns:[]string{"233.5.5.5","8.8.8.8"}}}
+	c[0].Modify(conn)
+	c[0].Up()
+}
+
+
+
+func Test_CreateNewConnection(t *testing.T) {
 	// initialise connection details
 	newConn := Connection{
 		Name:      "wcrd-go-nmcli-wrapper-test-connection",
@@ -33,26 +74,6 @@ func Test_CreateNewConnection(t *testing.T) {
 		t.Errorf("%v", err)
 	}
 
-}
-
-// https://blog.csdn.net/kfepiza/article/details/127525326
-func Test_ModifyConnection(t *testing.T) {
-	c, _ := GetConnectionByName("eno1")
-	if len(c) == 0 {
-		t.Skipf("Test connection has not been created. This may be due to a prior test failure. Skipping this test.")
-	}
-	conn:=Connection{Addr: &AddressDetail{Ipv4_method:"manual",Ipv4_address:"192.168.0.101/24",Ipv4_dns:[]string{"223.5.5.5","8.8.8.8"}}}
-	c[0].Modify(conn)
-}
-
-
-func Test_GetAddrDetail(t *testing.T) {
-	addr,err:=GetAddrDetail("有线连接 1")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	fmt.Println(addr)
 }
 
 

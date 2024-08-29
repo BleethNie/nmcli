@@ -92,6 +92,7 @@ func (c Connection) Down() (msg string, err error) {
 }
 
 
+
 // Modifies the connection with given parameters.
 func (c *Connection) Modify(new_c Connection) (msg string, err error) {
 	// conn_name := &c.Name
@@ -102,9 +103,8 @@ func (c *Connection) Modify(new_c Connection) (msg string, err error) {
 		fmt.Println("Address present.")
 	}
 	cmds_str := strings.Join(cmds, " ")
-	command:=fmt.Sprintf(`nmcli connection mod "%v" %v`, c.Name, cmds_str)
+	command := fmt.Sprintf(`nmcli connection mod "%v" %v`, c.Name, cmds_str)
 	fmt.Println(command)
-	return
 	res, err := exec.Command(
 		"bash",
 		"-c",
@@ -120,10 +120,8 @@ func (c *Connection) Modify(new_c Connection) (msg string, err error) {
 		return "", err
 	}
 	*c = new_conn[0]
-
 	return string(res), nil
 }
-
 
 // Returns all connections defined in nmcli
 // Equivalent to: nmcli connection
@@ -143,8 +141,8 @@ func Connections() []Connection {
 		results = append(results, parseConnection(line))
 	}
 	for index, conn := range results {
-		addr,err:=GetAddrDetail(conn.Name)
-		if err==nil{
+		addr, err := GetAddrDetail(conn.Name)
+		if err == nil {
 			results[index].Addr = &addr
 		}
 	}
@@ -161,8 +159,8 @@ func GetConnectionByName(conn string) ([]Connection, error) {
 	existingConns := []Connection{}
 	for _, c := range conns {
 		if c.Name == conn {
-			addr,err:=GetAddrDetail(c.Name)
-			if err==nil{
+			addr, err := GetAddrDetail(c.Name)
+			if err == nil {
 				c.Addr = &addr
 			}
 			existingConns = append(existingConns, c)
@@ -219,19 +217,20 @@ func GetAddrDetail(connName string) (AddressDetail, error) {
 		if strings.Contains(line, "ipv4.method:") {
 			addr.Ipv4_method = strings.TrimSpace(strings.TrimPrefix(line, "ipv4.method:"))
 		}
-		if strings.Contains(line, "IP4.ADDRESS[1]:") {
-			addr.Ipv4_address = strings.TrimSpace(strings.TrimPrefix(line, "IP4.ADDRESS[1]:"))
+		if strings.Contains(line, "ipv4.addresses:") {
+			addr.Ipv4_address = strings.TrimSpace(strings.TrimPrefix(line, "ipv4.addresses:"))
 		}
-		if strings.Contains(line, "IP4.GATEWAY:") {
-			addr.Ipv4_gateway = strings.TrimSpace(strings.TrimPrefix(line, "IP4.GATEWAY:"))
+		if strings.Contains(line, "ipv4.gateway:") {
+			addr.Ipv4_gateway = strings.TrimSpace(strings.TrimPrefix(line, "ipv4.gateway:"))
 		}
-		if strings.Contains(line, "IP4.DNS[1]:") {
-			dns := strings.TrimSpace(strings.TrimPrefix(line, "IP4.DNS[1]:"))
-			addr.Ipv4_dns = append(addr.Ipv4_dns, dns)
-		}
-		if strings.Contains(line, "IP4.DNS[2]:") {
-			dns := strings.TrimSpace(strings.TrimPrefix(line, "IP4.DNS[2]:"))
-			addr.Ipv4_dns = append(addr.Ipv4_dns, dns)
+		if strings.Contains(line, "ipv4.dns:") {
+			dns := strings.TrimSpace(strings.TrimPrefix(line, "ipv4.dns:"))
+			if strings.Contains(dns,","){
+				dnsArray:=strings.Split(dns,",")	
+				addr.Ipv4_dns = append(addr.Ipv4_dns, dnsArray...)
+			}else{
+				addr.Ipv4_dns = append(addr.Ipv4_dns, dns)
+			}
 		}
 	}
 	return addr, nil
